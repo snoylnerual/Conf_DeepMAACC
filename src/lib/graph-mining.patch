@@ -1,0 +1,148 @@
+diff --git a/examples/BUILD b/examples/BUILD
+index dad5eda..e742bc0 100644
+--- a/examples/BUILD
++++ b/examples/BUILD
+@@ -27,4 +27,5 @@ cc_binary(
+         "//in_memory/clustering/hac:parhac",
+         "@com_google_absl//absl/status",
+     ],
++    linkshared = 1
+ )
+diff --git a/examples/quickstart.cc b/examples/quickstart.cc
+index 266f956..ad98164 100644
+--- a/examples/quickstart.cc
++++ b/examples/quickstart.cc
+@@ -25,41 +25,58 @@ using graph_mining::in_memory::ParHacClusterer;
+ using graph_mining::in_memory::SimpleUndirectedGraph;
+ using graph_mining::in_memory::ClustererConfig;
+ 
+-absl::Status ClusteringExample() {
+-  // Initialize a graph, where higher weight = more similar.
+-  SimpleUndirectedGraph graph;
+-  RETURN_IF_ERROR(
+-      graph.AddEdge(/*from_node=*/0, /*to_node=*/1,
+-                    /*weight=*/0.9));
+-  RETURN_IF_ERROR(graph.AddEdge(0, 2, 0.9));
+-  RETURN_IF_ERROR(graph.AddEdge(1, 2, 0.8));
+-  RETURN_IF_ERROR(graph.AddEdge(2, 3, 0.1));
+-  RETURN_IF_ERROR(graph.AddEdge(3, 4, 0.9));
++extern "C" {
++  struct NodeArray {
++        int* nodes;
++        int length;
++  };
+ 
+-  // Initialize the clusterer.
+-  ParHacClusterer clusterer;
+-  RETURN_IF_ERROR(CopyGraph(graph, clusterer.MutableGraph()));
++  struct ClusterArray {
++    NodeArray* clusters;
++    int length;
++  };
+ 
+-  // Run parhac clustering.
+-  ClustererConfig config;
+-  config.mutable_parhac_clusterer_config()->set_weight_threshold(0.3);
+-  ASSIGN_OR_RETURN(auto clustering, clusterer.Cluster(config));
++  ClusterArray do_clustering(const int* edges,
++			     const float* weights,
++			     const int len,
++			     const float threshold) {
++    // Initialize a graph, where higher weight = more similar.
++    SimpleUndirectedGraph graph;
++    
++    for (int i = 0; i < len / 2; i++) {
++      RETURN_NULL_IF_ERROR(graph.AddEdge(edges[2 * i], edges[2 * i + 1], weights[i]));
++    }
++
++    // Initialize the clusterer.
++    ParHacClusterer clusterer;
++    RETURN_NULL_IF_ERROR(CopyGraph(graph, clusterer.MutableGraph()));
++
++    // Run parhac clustering.
++    ClustererConfig config;
++    config.mutable_parhac_clusterer_config()->set_weight_threshold(threshold);
++    ASSIGN_OR_RETURN_NULL(auto clustering, clusterer.Cluster(config));
+ 
+-  // Print the cluster assignments.
+-  for (const std::vector<int>& cluster : clustering) {
+-    for (auto id : cluster) {
+-      std::cout << id << ",";
++    // Construct and return output
++    ClusterArray result;
++    int sz = clustering.size();
++    result.clusters = new NodeArray[sz];
++    result.length = sz;
++    int i = 0;
++    for (const std::vector<int>& cluster : clustering) {
++      int cls_sz = cluster.size();
++      result.clusters[i].nodes = new int[cls_sz];
++      result.clusters[i].length = cls_sz;
++      int j = 0;
++      for (const int node : cluster) {
++	result.clusters[i].nodes[j] = node;
++	j++;
++      }
++      i++;
+     }
+-    std::cout << std::endl;
++    return result;
+   }
+-
+-  return absl::OkStatus();
+ }
+ 
+ int main(void) {
+-  auto status = ClusteringExample();
+-  if (!status.ok()) {
+-    std::cout << "Error: " << status.ToString() << std::endl;
+-  }
+   return 0;
+ }
+diff --git a/in_memory/status_macros.h b/in_memory/status_macros.h
+index da1f923..b346244 100644
+--- a/in_memory/status_macros.h
++++ b/in_memory/status_macros.h
+@@ -353,6 +353,14 @@ inline internal_status::IsOkMatcher IsOk() {
+   }                                                 \
+   lhs = std::move(statusor.value())
+ 
++#define ASSIGN_OR_RETURN_NULL_IMPL(statusor, lhs, rexpr) \
++  auto statusor = (rexpr);				 \
++  if (!statusor.ok()) {					 \
++    ClusterArray n {nullptr, -1};			 \
++    return n;						 \
++  }							 \
++  lhs = std::move(statusor.value())
++  
+ // Executes an expression that returns an absl::StatusOr, extracting its value
+ // into the variable defined by lhs (or returning on error).
+ //
+@@ -365,6 +373,9 @@ inline internal_status::IsOkMatcher IsOk() {
+ #define ASSIGN_OR_RETURN(lhs, rexpr) \
+   ASSIGN_OR_RETURN_IMPL(CONCAT_MACRO(_status_or, __COUNTER__), lhs, rexpr)
+ 
++#define ASSIGN_OR_RETURN_NULL(lhs, rexpr) \
++  ASSIGN_OR_RETURN_NULL_IMPL(CONCAT_MACRO(_status_or, __COUNTER__), lhs, rexpr)
++
+ // Run a command that returns a util::Status.  If the called code returns an
+ // error status, return that status up out of this method too.
+ //
+@@ -390,6 +401,17 @@ inline internal_status::IsOkMatcher IsOk() {
+     }                                                                 \
+   }
+ 
++#define RETURN_NULL_IF_ERROR(expr)                                    \
++  {                                                                   \
++    const ::absl::Status _status = (expr);                            \
++    if (!_status.ok()) {                                              \
++      ABSL_LOG(ERROR) << "Return Error: " << #expr << " failed with " \
++                      << _status;                                     \
++      ClusterArray n {nullptr, -1};			      \
++      return n;							      \
++    }                                                                 \
++  }
++
+ #endif
+ 
+ }  // namespace in_memory

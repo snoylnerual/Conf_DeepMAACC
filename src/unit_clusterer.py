@@ -173,7 +173,7 @@ class UnitClustering:
 
 
     def do_clustering(self, edges, weights, threshold):
-        libquickstart = ctypes.CDLL('libquickstart.so')  # '../dms-codebase/dms/lib/clustering.dylib')#
+        libquickstart = ctypes.CDLL('lib/libquickstart.so')  # '../dms-codebase/dms/lib/clustering.dylib')#
         libquickstart.do_clustering.restype = ClusterArray
         libquickstart.do_clustering.argtypes = [ctypes.POINTER(ctypes.c_int),
                                                 ctypes.POINTER(ctypes.c_float),
