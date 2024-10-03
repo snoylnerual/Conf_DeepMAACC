@@ -1,4 +1,4 @@
-# DeepMAACC: Neuron and Mutant Clustering for Faster DNN Mutation Analysis -  Replication Package
+# DeepMAACC: On Accelerating Deep Neural Network Mutation Analysis by Neuron and Mutant Clustering - Replication Package
 
 This repository contains all the data and code needed to replicate our experiments.
 
