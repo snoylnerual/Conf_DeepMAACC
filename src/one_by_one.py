@@ -130,6 +130,7 @@ class OBO:
                 cluster_indices[i] -= offset
             temp += [cluster_indices]
             cluster_size_list.append(len(cluster_indices))
+        layer_cluster_list += [temp]
 
         self._cluster_amount = len(cluster_size_list)
         self._max_cluster_size = max(cluster_size_list)
