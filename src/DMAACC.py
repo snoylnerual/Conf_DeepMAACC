@@ -93,7 +93,7 @@ class DMAACC:
 
         return df_vanilla
 
-    def run_approach_1(self):
+    def run_neuron_clustering(self):
         df_clusters = pd.DataFrame(
             columns=['Model_Type', 'Dataset', 'Mutation_Level', 'Mutate_time',
                      'Number_of_Mutants', 'Number_of_Clusters', 'Clusters_per_layer',
@@ -137,7 +137,7 @@ class DMAACC:
 
         return df_clusters
 
-    def run_approach_2(self):
+    def run_mutant_clustering(self):
         start = time.time()
         mg = MutationGenerator(self._model_filename, self._model, [], 'neuron')
         mg.set_mutation_percent(self._mutation_percent)
@@ -250,7 +250,7 @@ class DMAACC:
 
         return df_vanilla
 
-    def run_one_by_one_a1(self):
+    def run_one_by_one_neuron_clustering(self):
         obo = OBO(self._model_filename, self._model, self._dataset, self._dataset.get_dataset_name(), 'cluster')
         ms = MutationScore(self._model_filename.split('.')[0], self._model, [], self._dataset,
                            self._dataset.get_dataset_name(), self._mutation_level)
@@ -326,7 +326,7 @@ class DMAACC:
         return df_clusters
 
 
-    def run_one_by_one_a2(self):
+    def run_one_by_one_mutant_clustering(self):
         obo = OBO(self._model_filename, self._model, self._dataset, self._dataset.get_dataset_name(), 'neuron')
         nb_classes = self._dataset.get_nb_classes()
         ms = MutationScore(self._model_filename.split('.')[0], self._model, [], self._dataset,

@@ -12,8 +12,8 @@ import os.path
 
 if __name__ == "__main__":
     run_type = 'vanilla'
-    # run_type = 'approach1'
-    # run_type = 'approach2'
+    # run_type = 'neuron_clustering'
+    # run_type = 'mutant_clustering'
 
     # arch_type = 'all'
     arch_type = 'one_by_one'
@@ -57,8 +57,8 @@ if __name__ == "__main__":
         dmaacc_run.set_mutation_percent(float(args.mutation_percent))
         dmaacc_run.set_cluster_size(int(args.cluster_size))
         dmaacc_run.set_one_unit_per_cluster(args.one_unit_per_cluster.lower() == 'true')
-        df1 = dmaacc_run.run_approach_1()
-        df2, df3 = dmaacc_run.run_approach_2()
+        df1 = dmaacc_run.run_neuron_clustering()
+        df2, df3 = dmaacc_run.run_mutant_clustering()
 
     # ========================================================================================================
     elif run_type == 'vanilla':
@@ -95,7 +95,7 @@ if __name__ == "__main__":
                             df_clusters.to_csv(csvfile, mode='w', header=True, index=False)
 
     # ========================================================================================================
-    elif run_type == 'approach1':
+    elif run_type == 'neuron_clustering':
         dmaacc_run = DMAACC()
         # dmaacc_run.set_one_unit_per_cluster(args.one_unit_per_cluster.lower() == 'true')
         dmaacc_run.set_mutation_percent(0.1)
@@ -120,22 +120,22 @@ if __name__ == "__main__":
                     for i in range(6):
                         dmaacc_run.set_cluster_size(num)
                         if arch_type == 'all':
-                            df_clusters = dmaacc_run.run_approach_1()
-                            csvfile = 'experiments_approach1.csv'
+                            df_clusters = dmaacc_run.run_neuron_clustering()
+                            csvfile = 'experiments_neuronc.csv'
                             if os.path.isfile(csvfile):
                                 df_clusters.to_csv(csvfile, mode='a', header=False, index=False)
                             else:
                                 df_clusters.to_csv(csvfile, mode='w', header=True, index=False)
                         elif arch_type == 'one_by_one':
-                            df_clusters = dmaacc_run.run_one_by_one_a1()
-                            csvfile = 'experiments_approach1_obo.csv'
+                            df_clusters = dmaacc_run.run_one_by_one_neuron_clustering()
+                            csvfile = 'experiments_neuronc_obo.csv'
                             if os.path.isfile(csvfile):
                                 df_clusters.to_csv(csvfile, mode='a', header=False, index=False)
                             else:
                                 df_clusters.to_csv(csvfile, mode='w', header=True, index=False)
 
     # ========================================================================================================
-    elif run_type == 'approach2':
+    elif run_type == 'mutant_clustering':
         dmaacc_run = DMAACC()
         dmaacc_run.set_mutation_level("cluster")
         dmaacc_run.set_mutator_list(['CW', 'NAI', 'NEB'])
@@ -157,15 +157,15 @@ if __name__ == "__main__":
                         dmaacc_run.set_ParHAC_threshold(threshold)
                         dmaacc_run.set_mutation_level(['cluster'])
                         if arch_type == 'all':
-                            df_clusters = dmaacc_run.run_approach_2()
-                            csvfile = 'experiments_approach2.csv'
+                            df_clusters = dmaacc_run.run_mutant_clustering()
+                            csvfile = 'experiments_mutantc.csv'
                             if os.path.isfile(csvfile):
                                 df_clusters.to_csv(csvfile, mode='a', header=False, index=False)
                             else:
                                 df_clusters.to_csv(csvfile, mode='w', header=True, index=False)
                         elif arch_type == 'one_by_one':
-                            df_clusters = dmaacc_run.run_one_by_one_a2()
-                            csvfile = 'experiments_approach2_obo.csv'
+                            df_clusters = dmaacc_run.run_one_by_one_mutant_clustering()
+                            csvfile = 'experiments_mutantc_obo.csv'
                             if os.path.isfile(csvfile):
                                 df_clusters.to_csv(csvfile, mode='a', header=False, index=False)
                             else:
