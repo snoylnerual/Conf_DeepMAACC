@@ -25,7 +25,7 @@ Within src folder, there is a compiled version of modified Graph Mining library.
 DeepMAACC is an implementation of a framework presented in ICST 2025.
 If you use DeepMAACC in your research, please use the following BibTeX entry.
 ```text
-@inproceedings{lyons2025deepaaacc,
+@inproceedings{lyons2025deepmaacc,
   title={On Accelerating Deep Neural Network Mutation Analysis by Neuron and Mutant Clustering},
   author={Lyons, Lauren and Ghanbari, Ali},
   booktitle={Proceedings of the 18th IEEE International Conference on Software Testing, Verification and Validation (ICST 2025)},
